@@ -1,5 +1,5 @@
 interface Props {
-  children: React.JSX.Element;
+  children: React.JSX.Element | Array<React.JSX.Element>;
   title: string;
 }
 
