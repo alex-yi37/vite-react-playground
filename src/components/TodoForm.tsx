@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { generateRandomTodoId } from "../utils";
 import { Button } from "./Button";
+import { FormContainer } from "./FormContainer";
 
 interface Todo {
   id: string;
@@ -11,6 +12,35 @@ interface Todo {
 
 interface TodoFormProps {
   submitTodo: (todo: Todo) => void;
+  deleteTodo: (todoId: string) => void;
+}
+
+export function TodoListContainer() {
+  const [todos, setTodos] = useState<Array<Todo>>([]);
+
+  function addTodo(todo: Todo) {
+    console.log("wubba todo?", todo, "and todos", todos);
+    setTodos([todo, ...todos]);
+  }
+
+  function deleteTodo(todoId: string) {
+    const filteredTodos = todos.filter((todo) => {
+      return todo.id !== todoId;
+    });
+
+    setTodos(filteredTodos);
+  }
+
+  return (
+    <FormContainer title="Add a Todo">
+      <div>
+        <TodoForm submitTodo={addTodo} deleteTodo={deleteTodo} />
+      </div>
+      <div>
+        <TodoList todos={todos} />
+      </div>
+    </FormContainer>
+  );
 }
 
 export function TodoForm({ submitTodo }: TodoFormProps) {
@@ -70,14 +100,14 @@ export function TodoForm({ submitTodo }: TodoFormProps) {
 }
 
 interface TodoListProps {
-  todoList: Array<Todo>;
+  todos: Array<Todo>;
 }
 
-export function TodoList({ todoList }: TodoListProps) {
+export function TodoList({ todos }: TodoListProps) {
   return (
     <ul>
-      {todoList?.length > 0 ? (
-        todoList.map((todo) => {
+      {todos?.length > 0 ? (
+        todos.map((todo) => {
           return (
             <li key={todo.id}>
               <h2>{todo.title}</h2>
