@@ -31,35 +31,45 @@ export function TextInput({
     // Property 'validationMessage' does not exist on type 'EventTarget'.
     // is using a type assertion really the only way to correctly type the event?
     const target = event.target as HTMLInputElement;
-
-    // console.log(
-    //   "invalid event target validationMessage",
-    //   target.validationMessage
-    // );
-
-    // when the input doesn't pass the html validation we provide on it, I believe the onInvalid event gets fired
-    // and in this case we set our validationMessage state to the validation message provided by the browser
+    console.log("onInvalid firing", target);
+    /*  
+      3/7/2024 - when the input doesn't pass the html validation we provide on it, I believe the onInvalid event gets fired
+      and in this case we set our validationMessage state to the validation message provided by the browser
+      3/8/2024 - actually, the "invalid" event gets fired by the parent form when we call its "checkValidity" message which
+      is what we're doing here (check the "Form" component). There is also a "checkValidity" method on input elements, but
+      that is not being used in the demo I'm referencing for the code I wrote at the moment. So this onInvalid handler
+      is only firing when we submit the form per docs: https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement#instance_methods
+      Note the "checkValidity" wording under the linked docs heading. My assumption previously was that the "invalid" event
+      handled by this onInvalid handler was getting called when we blurred the input, but that was not the case and the behvavior
+      was confusing me. With this knowledge, things make more sense
+    */
     setValidationMessage(target.validationMessage);
   }
 
   function onBlur(event: FormEvent) {
     const target = event.target as HTMLInputElement;
 
-    // I guess the onInvalid event fires and is processed before the onBlur event for this to work?
-
-    // when we blur the input, we want the browser to re-check validation. If the browser validates successfully as in
-    // the value of the input is valid, the HTML constraint validation message is read as an empty string
-    // per MDN: https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation#complex_constraints_using_the_constraint_validation_api
-    // an empty string is returned as the target.validationMessage if the input is valid, else it is a non-empty string
-
+    /* 
+      when we blur the input, we want the browser to re-check validation. If the browser validates successfully as in
+      the value of the input is valid, the HTML constraint validation message is read as an empty string
+      per MDN: https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation#complex_constraints_using_the_constraint_validation_api
+      an empty string is returned as the target.validationMessage if the input is valid, else it is a non-empty string
+    */
+    console.log("blur event firing", target);
+    console.log("state valid message", validationMessage);
     // get a boolean representation of the message
     const isInputValid = !!validationMessage;
-
-    // console.log("blur target validationMessage", target.validationMessage);
 
     if (isInputValid) {
       setValidationMessage(target.validationMessage);
     }
+
+    /*
+      seemingly, adding this line seems to achieve the behavior I want: validate the input on blur before the form is
+      submitted, and also validate all the fields on form submit. Need to figure out the logic going on here and order of
+      events because I don't quite follow it yet
+    */
+    target.checkValidity();
   }
 
   // so interestingly, the validationMessage on the event targets on blur and validation handlers seems to
@@ -69,10 +79,11 @@ export function TextInput({
   // setting the validationMessage state? Is it because the state itself doesn't change?
   // the demo I linked also seems to work this way.
 
-  // how can I get it so that input validation on the text inputs fires off without first having to submit the form?
-
-  // console.log("why no validation message changes???", validationMessage);
-
+  /* 
+    how can I get it so that input validation on the text inputs fires off without first having to submit the form?
+    Potential answer: use the HTMLInputElement#checkValidity method to check validation for just a single, specific element
+    if the element is invalid, this method returns false and the element also receives the "invalid" event
+  */
   return (
     <div className="flex flex-col gap-2 p-2 sm:items-center bg-red-300">
       <label htmlFor={id}>{label}</label>
