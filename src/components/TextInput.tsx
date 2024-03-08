@@ -24,7 +24,52 @@ export function TextInput({
   // fails validation
   const [validationMessage, setValidationMessage] = useState("");
 
+  /*
+    User flow scenarios:
+    1. user enters all form fields then clicks submit. Expect that every time the user blurs an input, the inputs are validated
+       and we can't successfully submit the form until all fields are valid
+    2. user clicks submit on empty form. Expect any invalid fields to prevent successful submission
+    3. user fills out some fields but not others aka not all inputs get blurred (assuming all are required), then clicks submit. 
+       Expect the fields that were filled out to be validated, and on form submission any fields that the user did not enter data
+       into also get validated. In this case where all fields are required, any unfilled fields are marked as invalid
+
+    How I think this all works out:
+    1. The form component checks validity of inputs only on submission, which will show us any invalid fields when user clicks
+       submit button. From Form.tsx, we have this line in the submit handler:
+       const isValidForm = formElement.checkValidity();
+       this method call to checkValidity checks if all constraints of its children inputs are met, and fires off "invalid" events
+       to every input that doesn't pass. It also returns a boolean, true to indicate validation passed and false to indicate
+       that not every input was valid.
+    2. As a result of the form firing off "invalid" events, this TextInput component receives it and has a registered event
+       handler called onInvalid to handle it. Also note the "validationMessage" state defined in this component. It represents 
+       the native validation message (HTMLInputElement.validationMessage property) browsers provide for inputs that don't pass
+       validation. If the input is invalid, the message is a non-empty string, and if it is valid then it is an empty string.
+       There is also an onBlur handler to handle blur events on the input element that is part of this component
+    3. When the input receives the "invalid" event, we grab the validationMessage from it using React (using the property
+       event.target.validationMessage) and then set our "validationMessage" React state with the value (which should be a
+       non-empty string representing the browser validation message). In our rendered output, we check if the 
+       "validationMessage" state is a truthy value (non-empty string) and show an error message if so, else we just render null
+    4. I'M ACTUALLY STILL CONFUSED ABOUT THE BLUR HANDLER - REVISIT AGAIN:
+       Taking note of the onBlur handler defined in this component, it also reads the validationMessage from the input whenever
+       the input is blurred. Reading from top to bottom, we grab the event target (the input that was blurred), and determine if
+       our "validationMessage" state (set by onInvalid handler) is empty or not in order to tell if the input is valid or not. 
+       For convenience and clarity, we turn it into a boolean but I'm pretty sure that isn't actually necessary. And if our state
+       is an empty string aka passes validation, then what? I actually think the "validationMessage" state and the validationMessage
+       from our input get a little out of sync. The form and inputs are working how I'd like, but not in the way I'd expect
+       when looking at the console logged values for our validationMessage state and the event.target.validationMessage value.
+       - I think one possible thing happening here is we're seeing old state from a stale closure, but I'd have to think more about
+         this scenario
+       - also note, I'm calling target.checkValidity() unconditionally where the target is the input that gets blurred. What I
+         belive this does is send another "invalid" event to the input and if the input is valid after blur. If valid, no additional
+         "invalid" event gets fired. However, if the input doesn't pass validation, an "invalid" event gets fired specifically to
+         the indivdual TextInput input and we see its corresponding error message
+
+    NOTE: in scenario 3, we see 3 invalid events get fired which makes sense because the form calls its checkValidity method
+      
+  */
+
   function onInvalid(event: FormEvent) {
+    // console.log("on invalid firing");
     // need to assert event.target as HTMLInputElement, I believe, because event.target is typed as a generic
     // HTMLElement which does not have a "validationMessage" property on it, but HTMLInputElement does
     // if you remove the "as HTMLInputElement" type assertion, we see that we do get a Typescript error reading:
@@ -47,7 +92,7 @@ export function TextInput({
 
   function onBlur(event: FormEvent) {
     const target = event.target as HTMLInputElement;
-
+    // console.log("on blur firing");
     /* 
       when we blur the input, we want the browser to re-check validation. If the browser validates successfully as in
       the value of the input is valid, the HTML constraint validation message is read as an empty string
@@ -56,8 +101,17 @@ export function TextInput({
     */
     // get a boolean representation of the message
     const isInputValid = !!validationMessage;
-
+    // explore this console log output again later - 3/8/2024
+    // console.log(
+    //   "isinput valid",
+    //   isInputValid,
+    //   "and validation message state",
+    //   validationMessage,
+    //   "event target?",
+    //   target.validationMessage
+    // );
     if (isInputValid) {
+      // target.validationMessage is an empty string if the input passes validation
       setValidationMessage(target.validationMessage);
     }
 
