@@ -31,7 +31,6 @@ export function TextInput({
     // Property 'validationMessage' does not exist on type 'EventTarget'.
     // is using a type assertion really the only way to correctly type the event?
     const target = event.target as HTMLInputElement;
-    console.log("onInvalid firing", target);
     /*  
       3/7/2024 - when the input doesn't pass the html validation we provide on it, I believe the onInvalid event gets fired
       and in this case we set our validationMessage state to the validation message provided by the browser
@@ -55,8 +54,6 @@ export function TextInput({
       per MDN: https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation#complex_constraints_using_the_constraint_validation_api
       an empty string is returned as the target.validationMessage if the input is valid, else it is a non-empty string
     */
-    console.log("blur event firing", target);
-    console.log("state valid message", validationMessage);
     // get a boolean representation of the message
     const isInputValid = !!validationMessage;
 
@@ -65,6 +62,7 @@ export function TextInput({
     }
 
     /*
+      BIG NOTE: I WANT TO UNDERSTAND WHAT'S GOING ON HERE
       seemingly, adding this line seems to achieve the behavior I want: validate the input on blur before the form is
       submitted, and also validate all the fields on form submit. Need to figure out the logic going on here and order of
       events because I don't quite follow it yet
