@@ -2,26 +2,35 @@ import { Form } from "../../components/Form";
 import { TextInput } from "../../components/TextInput";
 import { FormButton } from "../../components/FormButton";
 
-export function AddressInfoForm() {
+interface AddressInfoFormProps {
+  handleSubmit: (data: FormData) => void;
+}
+
+export function AddressInfoForm({ handleSubmit }: AddressInfoFormProps) {
   return (
-    <Form>
+    <Form onSubmit={handleSubmit}>
       <div className="container">
         <TextInput
-          label="First Name:"
+          label="Address Line 1:"
+          name="address-1"
           type="text"
-          id="firstName"
+          id="address-1"
           required
           minLength={5}
         />
         <TextInput
-          label="Email:"
-          type="email"
-          id="email"
+          label="Address Line 2:"
+          name="address-2"
+          type="text"
+          id="address-2"
           required
           minLength={5}
         />
         <FormButton className="bg-slate-500 w-full py-2" type="submit">
-          Submit
+          Back
+        </FormButton>
+        <FormButton className="bg-slate-500 w-full py-2" type="submit">
+          Next
         </FormButton>
       </div>
     </Form>

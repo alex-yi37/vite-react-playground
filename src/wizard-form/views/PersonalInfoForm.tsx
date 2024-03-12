@@ -2,11 +2,13 @@ import { Form } from "../../components/Form";
 import { TextInput } from "../../components/TextInput";
 import { FormButton } from "../../components/FormButton";
 
-export function PersonalInfoForm() {
+interface PersonalInfoFormProps {
+  handleSubmit: (data: FormData) => void;
+}
+
+export function PersonalInfoForm({ handleSubmit }: PersonalInfoFormProps) {
   return (
-    <Form
-      onSubmit={(data) => console.log("lookin at form data", data.get("email"))}
-    >
+    <Form onSubmit={handleSubmit}>
       <div className="container">
         <TextInput
           label="First Name:"

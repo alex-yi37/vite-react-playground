@@ -1,7 +1,7 @@
 // want to use this as a finite state machine for making simple transitions in a wizard form
 // trying to model this based on David K article: https://dev.to/davidkpiano/you-don-t-need-a-library-for-state-machines-k7h
-interface Event {
-  type: "next" | "back" | "submit" | "reset";
+export interface Event {
+  type: "next" | "back" | "reset";
 }
 
 interface State {
@@ -65,4 +65,64 @@ export function wizardController(state: State, event: Event): State {
   console.log(state, event);
 
   return { ...state, status: "personalInfo" };
+}
+
+export function newWizardController(state: State, event: Event): State {
+  const currentState = state.status;
+
+  switch (currentState) {
+    case "personalInfo":
+      return personalInfoState(state, event);
+    case "addressInfo":
+      return addressInfoState(state, event);
+    case "billingInfo":
+      return billingInfoState(state, event);
+    case "confirmation":
+      return confirmationState(state, event);
+    default:
+      return { ...state, status: currentState };
+  }
+}
+
+// personalInfo => address => billing => confirmation => personalInfo
+
+function personalInfoState(state: State, event: Event): State {
+  switch (event.type) {
+    case "next":
+      return { ...state, status: "addressInfo" };
+    default:
+      // if we don't handle an event, ignore it and just return the current state
+      return state;
+  }
+}
+
+function addressInfoState(state: State, event: Event): State {
+  switch (event.type) {
+    case "next":
+      return { ...state, status: "billingInfo" };
+    case "back":
+      return { ...state, status: "personalInfo" };
+    default:
+      return state;
+  }
+}
+
+function billingInfoState(state: State, event: Event): State {
+  switch (event.type) {
+    case "next":
+      return { ...state, status: "confirmation" };
+    case "back":
+      return { ...state, status: "addressInfo" };
+    default:
+      return state;
+  }
+}
+
+function confirmationState(state: State, event: Event): State {
+  switch (event.type) {
+    case "reset":
+      return { ...state, status: "personalInfo" };
+    default:
+      return state;
+  }
 }
