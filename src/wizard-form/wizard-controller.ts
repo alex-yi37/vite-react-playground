@@ -8,9 +8,9 @@ interface State {
   status: "personalInfo" | "addressInfo" | "billingInfo" | "confirmation";
 }
 
-interface StateNode {
-  on: Event;
-}
+// interface StateNode {
+//   on: Event;
+// }
 
 // guarded transition seems necessary here to make sure we can only move forward if the current form is valid
 // or has already been submitted
@@ -32,40 +32,40 @@ interface StateNode {
   implementation in his article but opts to use the configuration object style that XState itself uses
 */
 
-const machine = {
-  initial: "personalInfo",
-  states: {
-    personalInfo: { on: { next: { target: "addressInfo" } } },
-    addressInfo: {
-      on: { next: { target: "billingInfo" }, back: { target: "billingInfo" } },
-    },
-    billingInfo: {
-      on: {
-        next: { target: "confirmation" },
-        back: { target: "addressInfo" },
-      },
-    },
-    confirmation: {
-      on: {
-        reset: { target: "personalInfo" },
-        back: { target: "billingInfo" },
-      },
-    },
-  },
-};
+// const machine = {
+//   initial: "personalInfo",
+//   states: {
+//     personalInfo: { on: { next: { target: "addressInfo" } } },
+//     addressInfo: {
+//       on: { next: { target: "billingInfo" }, back: { target: "billingInfo" } },
+//     },
+//     billingInfo: {
+//       on: {
+//         next: { target: "confirmation" },
+//         back: { target: "addressInfo" },
+//       },
+//     },
+//     confirmation: {
+//       on: {
+//         reset: { target: "personalInfo" },
+//         back: { target: "billingInfo" },
+//       },
+//     },
+//   },
+// };
 
-type MachineType = typeof machine;
+// type MachineType = typeof machine;
 
-export function wizardController(state: State, event: Event): State {
-  // based on the current state and received event, we determine what the next state to transition to should be
-  const nextStateNode: StateNode = machine.states[state.status].on?.[
-    event.type
-  ] ?? { target: state.status };
+// export function wizardController(state: State, event: Event): State {
+//   // based on the current state and received event, we determine what the next state to transition to should be
+//   const nextStateNode: StateNode = machine.states[state.status].on?.[
+//     event.type
+//   ] ?? { target: state.status };
 
-  console.log(state, event);
+//   console.log(state, event);
 
-  return { ...state, status: "personalInfo" };
-}
+//   return { ...state, status: "personalInfo" };
+// }
 
 export function newWizardController(state: State, event: Event): State {
   const currentState = state.status;

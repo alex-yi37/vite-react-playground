@@ -4,9 +4,13 @@ import { FormButton } from "../../components/FormButton";
 
 interface AddressInfoFormProps {
   handleSubmit: (data: FormData) => void;
+  handleBack: () => void;
 }
 
-export function AddressInfoForm({ handleSubmit }: AddressInfoFormProps) {
+export function AddressInfoForm({
+  handleSubmit,
+  handleBack,
+}: AddressInfoFormProps) {
   return (
     <Form onSubmit={handleSubmit}>
       <div className="container">
@@ -26,7 +30,11 @@ export function AddressInfoForm({ handleSubmit }: AddressInfoFormProps) {
           required
           minLength={5}
         />
-        <FormButton className="bg-slate-500 w-full py-2" type="submit">
+        <FormButton
+          onClick={handleBack}
+          className="bg-slate-500 w-full py-2"
+          type="button"
+        >
           Back
         </FormButton>
         <FormButton className="bg-slate-500 w-full py-2" type="submit">

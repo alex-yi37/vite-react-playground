@@ -1,14 +1,31 @@
 import { Form } from "../../components/Form";
 import { TextInput } from "../../components/TextInput";
 import { FormButton } from "../../components/FormButton";
+import { useWizardContext } from "../useWizardContext";
 
 interface PersonalInfoFormProps {
   handleSubmit: (data: FormData) => void;
 }
 
 export function PersonalInfoForm({ handleSubmit }: PersonalInfoFormProps) {
+  const { wizardValues, updateWizardValues } = useWizardContext();
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form
+      onSubmit={(formData) => {
+        const dataFirstName = formData.get("firstName");
+        const a = Object.fromEntries(formData.entries());
+        console.log("obj?", a);
+
+        if (typeof dataFirstName === "string") {
+          updateWizardValues({
+            type: "update",
+            payload: { firstName: dataFirstName },
+          });
+        }
+
+        handleSubmit(formData);
+      }}
+    >
       <div className="container">
         <TextInput
           label="First Name:"
@@ -18,6 +35,7 @@ export function PersonalInfoForm({ handleSubmit }: PersonalInfoFormProps) {
           required
           minLength={5}
           errorText="First name must be at least 5 characters"
+          defaultValue={wizardValues["firstName"] ? wizardValues.firstName : ""}
         />
         <TextInput
           label="Last Name:"
